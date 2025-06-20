@@ -533,12 +533,14 @@ function VideoScroll() {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '12px',
-                      padding: '16px 32px',
+                      padding: isMobile ? '12px 24px' : '8px 16px',
+                      minWidth: isMobile ? 48 : undefined,
+                      minHeight: isMobile ? 48 : undefined,
+                      borderRadius: '25px',
+                      fontSize: isMobile ? 18 : 14,
                       background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
                       color: '#000',
-                      borderRadius: '50px',
                       fontWeight: 700,
-                      fontSize: 18,
                       textDecoration: 'none',
                       boxShadow: '0 8px 32px rgba(0, 229, 255, 0.4)',
                       transition: 'transform 0.2s ease',
@@ -622,6 +624,9 @@ function VideoScroll() {
         {(() => {
           const firstStart = services[0]?.start ?? 10;
           const isActiveHome = currentT < firstStart;
+          if (isMobile && !isActiveHome) {
+            return null; // mobile: show Home only when active
+          }
           return (
             <button
               onClick={() => scrollToTime(0)}
@@ -631,9 +636,11 @@ function VideoScroll() {
                   : 'transparent',
                 color: isActiveHome ? '#000' : '#fff',
                 border: 'none',
-                padding: '8px 16px',
+                padding: isMobile ? '12px 24px' : '8px 16px',
+                minWidth: isMobile ? 48 : undefined,
+                minHeight: isMobile ? 48 : undefined,
                 borderRadius: '25px',
-                fontSize: 14,
+                fontSize: isMobile ? 18 : 14,
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
@@ -649,7 +656,9 @@ function VideoScroll() {
         {services.map((s, idx) => {
           const isActive = currentT >= s.start && currentT < s.end;
           const isContact = s.title === 'Contact Us';
-          
+          if (isMobile && !isActive) {
+            return null; // mobile: hide inactive section buttons
+          }
           return (
             <button
               key={s.title}
@@ -662,9 +671,11 @@ function VideoScroll() {
                   : 'transparent',
                 color: isActive ? '#000' : '#fff',
                 border: 'none',
-                padding: '8px 16px',
+                padding: isMobile ? '12px 24px' : '8px 16px',
+                minWidth: isMobile ? 48 : undefined,
+                minHeight: isMobile ? 48 : undefined,
                 borderRadius: '25px',
-                fontSize: 14,
+                fontSize: isMobile ? 18 : 14,
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
