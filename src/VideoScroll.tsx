@@ -104,7 +104,7 @@ function VideoScroll() {
       side: 'left',
       title: 'App Development',
       desc: 'Native, cross-platform & PWA apps built with React Native, Flutter and Swift/Kotlin. From MVP to App Store launch—plus continuous delivery & analytics.',
-      image: 'https://source.unsplash.com/featured/?mobile-app',
+      image: '/app-dev.gif',
     },
     {
       start: 38,
@@ -112,15 +112,15 @@ function VideoScroll() {
       side: 'right',
       title: 'Web Development',
       desc: 'Jamstack / Next.js sites that load in under 1 sec, score 95+ on Lighthouse and integrate seamlessly with headless CMS or e-commerce back-ends.',
-      image: 'https://source.unsplash.com/featured/?web-development',
+      image: '/web-dev.gif',
     },
     {
       start: 45,
       end: 51,
       side: 'left',
-      title: 'SEO',
+      title: 'Search Engine Optimization',
       desc: 'Technical audits, Core Web Vitals, schema markup and backlink outreach to rank you on page 1—and keep you there.',
-      image: 'https://source.unsplash.com/featured/?seo',
+      image: '/seo.gif',
     },
     {
       start: 52,
@@ -128,7 +128,7 @@ function VideoScroll() {
       side: 'right',
       title: 'Social Media Marketing',
       desc: 'Strategy, creative, paid ads and community management. Weekly KPI reviews and data-driven tweaks to maximize engagement & reach.',
-      image: 'https://source.unsplash.com/featured/?social-media',
+      image: '/smm.gif',
     },
     {
       start: 63,
@@ -136,6 +136,7 @@ function VideoScroll() {
       side: 'center',
       title: 'Contact Us',
       desc: 'Email: contact@bytesplatform.io\nPhone: +1 (555) 123-4567',
+      image: '/contact.gif',
     },
   ];
 
@@ -302,6 +303,15 @@ function VideoScroll() {
         }
       `}</style>
 
+      {/* Water shift keyframes for glossy navbar */}
+      <style>{`
+        @keyframes waterShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+
       {/* Service Cards */}
       <AnimatePresence>
         {services.map((s, i) => {
@@ -316,13 +326,13 @@ function VideoScroll() {
             top: isMobile
               ? '5vh'
               : (s.title === 'App Development' || s.title === 'Web Development'
-                  ? '10vh'
-                  : s.title === 'SEO'
-                  ? '22vh'
+                  ? '120px'
+                  : s.title === 'Search Engine Optimization'
+                  ? '26vh'
                   : s.title === 'Social Media Marketing'
-                  ? '15vh'
+                  ? '18vh'
                   : '50vh'),
-            left: isMobile ? '50vw' : isLeft ? (s.title === 'SEO' ? '8vw' : '10vw') : undefined,
+            left: isMobile ? '50vw' : isLeft ? (s.title === 'Search Engine Optimization' ? '8vw' : '10vw') : undefined,
             right: isMobile ? undefined : !isLeft ? (s.title === 'Web Development' ? '5vw' : '10vw') : undefined,
             transform: isMobile ? 'translate(-50%, -50%)' : 'translateY(-50%)',
             maxWidth: isMobile ? '90vw' : 'clamp(300px, 25vw, 400px)',
@@ -343,7 +353,7 @@ function VideoScroll() {
 
           const IconComponent = s.title === 'App Development' ? FaMobileAlt
             : s.title === 'Web Development' ? FaGlobe
-            : s.title === 'SEO' ? FaSearch
+            : s.title === 'Search Engine Optimization' ? FaSearch
             : s.title === 'Social Media Marketing' ? FaChartLine
             : FaEnvelope;
 
@@ -352,60 +362,53 @@ function VideoScroll() {
           return (
             <motion.div
               key={i}
-              layoutId={`card-${s.title}`}
-              initial={{ opacity: 0, y: 40, rotate: -5 }}
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              exit={{ opacity: 0, y: -40, rotate: 5 }}
-              transition={{ duration: 0.6, delay: i * 0.2, ease: 'easeOut' }}
-              whileHover={{ scale: 1.05, y: -10, boxShadow: '0 12px 30px rgba(0, 229, 255, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (s.title === 'Contact Us') {
-                  window.location.href = 'mailto:contact@bytesplatform.io';
-                } else {
-                  setAutoDisabledFor(null); // allow auto again (so it can reopen)
-                  setActiveCard(s);
-                }
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              style={{
+                position: 'fixed',
+                top: '30vh',
+                left: s.side === 'left' ? '8vw' : s.side === 'right' ? undefined : '50%',
+                right: s.side === 'right' ? '8vw' : undefined,
+                transform: s.side === 'center' ? 'translateX(-50%)' : undefined,
+                maxWidth: '500px',
+                padding: '32px 36px',
+                background: 'rgba(0,0,0,0.45)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 12,
+                color: '#fff',
+                pointerEvents: 'none',
               }}
-              style={{ ...baseStyle, cursor: 'pointer', opacity: isCardActive ? 0 : 1, pointerEvents: isCardActive ? 'none' : 'auto' }}
             >
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(17, 17, 17, 0.9))',
-                  backdropFilter: 'blur(10px)',
-                  padding: '24px 28px',
-                  borderRadius: 12,
-                  boxShadow: '0 8px 24px rgba(0, 229, 255, 0.3), 0 0 12px rgba(0, 229, 255, 0.1)',
-                  border: '1px solid rgba(0, 229, 255, 0.2)',
-                  color: '#ffffff',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-                  pointerEvents: 'auto',
-                  width: isCenter ? '80vw' : undefined,
-                  maxWidth: isCenter ? (isMobile ? '350px' : '600px') : undefined,
-                  textAlign: 'center',
-                }}
-              >
-                <IconComponent style={{ fontSize: 48, color: '#00e5ff', textShadow: '0 0 8px #00e5ff' }} />
-                <div style={{ fontWeight: 700, color: '#00e5ff', fontSize: 22, margin: '8px 0' }}>
-                  {s.title}
-                </div>
-                <div style={{ fontSize: 14, margin: '8px 0' }}>{s.desc}</div>
-                {s.title === 'Contact Us' && (
-                  <a
-                    href="mailto:contact@bytesplatform.io"
-                    style={{
-                      color: '#00e5ff',
-                      textDecoration: 'underline',
-                      fontSize: 14,
-                      marginTop: 8,
-                      display: 'block',
-                    }}
-                  >
-                    Get in Touch
-                  </a>
-                )}
-              </div>
+              {s.image && (
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 10, marginBottom: 16 }}
+                />
+              )}
+              {s.title && (
+                <div style={{ fontSize: 26, fontWeight: 700, color: '#00e5ff', marginBottom: 12 }}>{s.title}</div>
+              )}
+              <div style={{ fontSize: 16, lineHeight: 1.5, whiteSpace: 'pre-line' }}>{s.desc}</div>
+              {s.title === 'Contact Us' && (
+                <a
+                  href="mailto:contact@bytesplatform.io"
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 16,
+                    padding: '10px 22px',
+                    background: '#00e5ff',
+                    color: '#000',
+                    borderRadius: 30,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Email Us
+                </a>
+              )}
             </motion.div>
           );
         })}
@@ -500,15 +503,18 @@ function VideoScroll() {
           top: '16px',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          padding: '8px 16px',
+          background: 'linear-gradient(135deg, rgba(0,140,255,0.25), rgba(0,200,255,0.20), rgba(0,140,255,0.25))',
+          backgroundSize: '200% 200%',
+          animation: 'waterShift 8s ease-in-out infinite',
+          border: '1px solid rgba(0,229,255,0.4)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+          padding: '10px 20px',
           borderRadius: 9999,
           display: 'flex',
-          gap: '12px',
+          gap: '14px',
           zIndex: 10000,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          boxShadow: '0 6px 24px rgba(0,179,255,0.35), inset 0 0 12px rgba(0,229,255,0.2)',
         }}
       >
         {/* Home / Start Button */}
@@ -537,9 +543,11 @@ function VideoScroll() {
           );
         })()}
 
-        {services.map((s) => {
+        {services.map((s, idx) => {
           const isActive = currentT >= s.start && currentT < s.end;
           const isContact = s.title === 'Contact Us';
+          const blueShades = ['#0099ff', '#00b3ff', '#00ccff', '#00e5ff'];
+          const shade = blueShades[idx % blueShades.length];
           return (
             <button
               key={s.title}
@@ -548,23 +556,28 @@ function VideoScroll() {
                 background: isContact
                   ? isActive
                     ? '#ff4d4f'
-                    : 'rgba(255,77,79,0.15)'
+                    : 'rgba(255,77,79,0.12)'
                   : isActive
-                  ? '#00e5ff'
-                  : 'transparent',
+                  ? shade
+                  : 'rgba(255,255,255,0.08)',
                 color: isContact
                   ? '#fff'
                   : isActive
                   ? '#000'
                   : '#fff',
-                border: isContact ? '1px solid #ff4d4f' : '1px solid rgba(255,255,255,0.25)',
-                padding: '6px 14px',
+                border: isContact ? '1px solid #ff4d4f' : `1px solid ${shade}`,
+                padding: '8px 18px',
                 borderRadius: 9999,
                 fontSize: 14,
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.25s ease',
                 whiteSpace: 'nowrap',
+                boxShadow: isActive
+                  ? `0 2px 10px ${shade}66`
+                  : `0 2px 6px ${shade}33`,
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
               }}
             >
               {s.title}
