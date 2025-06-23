@@ -3,6 +3,7 @@ import {
   useMotionValueEvent,
   useScroll,
   useTransform,
+  useSpring,
   motion,
   AnimatePresence,
 } from 'framer-motion';
@@ -40,8 +41,12 @@ function VideoScroll() {
     offset: ['start start', 'end end'],
   });
 
-  // Map scroll progress to video time directly
-  const videoTime = useTransform(scrollYProgress, [0, 1], [0, duration]);
+  // Map scroll progress to video time and apply spring inertia
+  const rawVideoTime = useTransform(scrollYProgress, [0, 1], [0, duration]);
+  const videoTime = useSpring(rawVideoTime, {
+    stiffness: 60, // lower stiffness for smoother motion
+    damping: 20,   // controls how long it keeps moving (~2s feel)
+  });
 
   // Track desired video time and intro overlay
   const desiredTimeRef = useRef<number>(0);
@@ -95,8 +100,8 @@ function VideoScroll() {
   // Enhanced service data with more detailed content
   const services: ServiceCard[] = [
     {
-      start: 32,
-      end: 38,
+      start: 20,
+      end: 26,
       side: 'left',
       title: 'App Development',
       desc: 'Transform your ideas into powerful mobile experiences',
@@ -115,8 +120,8 @@ function VideoScroll() {
       image: '/app-dev.gif',
     },
     {
-      start: 38,
-      end: 44,
+      start: 32,
+      end: 38,
       side: 'right',
       title: 'Web Development',
       desc: 'Lightning-fast websites that convert visitors into customers',
@@ -135,8 +140,8 @@ function VideoScroll() {
       image: '/web-dev.gif',
     },
     {
-      start: 45,
-      end: 51,
+      start: 44,
+      end: 50,
       side: 'left',
       title: 'Search Engine Optimization',
       desc: 'Dominate search results and drive organic traffic',
@@ -155,8 +160,8 @@ function VideoScroll() {
       image: '/seo.gif',
     },
     {
-      start: 52,
-      end: 56,
+      start: 56,
+      end: 62,
       side: 'right',
       title: 'Social Media Marketing',
       desc: 'Build communities and amplify your brand across all platforms',
@@ -175,8 +180,8 @@ function VideoScroll() {
       image: '/smm.gif',
     },
     {
-      start: 63,
-      end: 70,
+      start: 68,
+      end: 75,
       side: 'center',
       title: 'Contact Us',
       desc: 'Ready to transform your digital presence?',
@@ -192,6 +197,8 @@ function VideoScroll() {
   ];
 
   const [currentT, setCurrentT] = useState<number>(0);
+  const DISPLAY_BUFFER = 2; // seconds to extend each component visibility
+  const GAP = 2; // seconds gap between successive cards
 
   useMotionValueEvent(videoTime, 'change', (t) => {
     setCurrentT(t);
@@ -221,7 +228,15 @@ function VideoScroll() {
   };
 
   // Get current active service
-  const currentService = services.find(s => currentT >= s.start && currentT < s.end);
+  const currentService = services.find((s, idx) => {
+    const start = s.start;
+    const end = s.end + DISPLAY_BUFFER;
+    const nextStart = idx < services.length - 1 ? services[idx + 1].start : Infinity;
+    return currentT >= start && currentT < end && currentT < nextStart - GAP;
+  });
+
+  const isEnhanced = currentService && (currentService.title as string) !== 'Contact Us';
+  const isRightService = currentService && ['Web Development', 'Social Media Marketing'].includes(currentService.title as string);
 
   return (
     <div
@@ -258,9 +273,9 @@ function VideoScroll() {
           left: 0,
           width: '100vw',
           height: '100vh',
-          background: currentService 
-            ? 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6))' 
-            : 'rgba(0,0,0,0.2)',
+          background: currentService
+            ? 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6))'
+            : 'transparent',
           pointerEvents: 'none',
           transition: 'background 0.8s ease',
         }}
@@ -362,7 +377,7 @@ function VideoScroll() {
               pointerEvents: isMobile ? 'auto' : 'none',
               overflowY: isMobile ? 'auto' : 'visible',
               zIndex: 50,
-              padding: isMobile ? '40px 8px 8px' : '0 16px', // further reduced top padding for mobile
+              padding: isMobile ? '16px 8px 8px' : '0 16px', // no navbar now
             }}
           >
             <div
@@ -378,7 +393,10 @@ function VideoScroll() {
             >
               {/* Text Content */}
               <motion.div
-                initial={{ x: currentService.side === 'right' ? 100 : -100, opacity: 0 }}
+                initial={{
+                  x: isEnhanced ? 0 : (currentService.side === 'right' ? 100 : -100),
+                  opacity: 0,
+                }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
                 style={{
@@ -390,17 +408,22 @@ function VideoScroll() {
               >
                 {/* Title */}
                 <motion.h1
-                  initial={{ y: 30, opacity: 0 }}
+                  initial={{ y: isEnhanced ? -60 : 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                   style={{
                     fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(32px, 6vw, 64px)',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     color: '#ffffff',
                     marginBottom: isMobile ? 12 : 16,
                     lineHeight: 1.1,
                     textShadow: '0 4px 16px rgba(0,0,0,0.8)',
                     textAlign: currentService.side === 'center' ? 'center' : 'left',
+                    background: isEnhanced
+                      ? 'linear-gradient(90deg, #a6f9ff, #d4b0ff)'
+                      : 'none',
+                    WebkitBackgroundClip: isEnhanced ? 'text' : undefined,
+                    WebkitTextFillColor: isEnhanced ? 'transparent' : undefined,
                   }}
                 >
                   {currentService.title}
@@ -480,7 +503,7 @@ function VideoScroll() {
                         <div
                           style={{
                             fontSize: isMobile ? 'clamp(16px, 4vw, 20px)' : 'clamp(24px, 4vw, 36px)',
-                            fontWeight: 800,
+                            fontWeight: 900,
                             color: '#00e5ff',
                             textShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
                           }}
@@ -533,13 +556,59 @@ function VideoScroll() {
                     Get Started →
                   </motion.a>
                 )}
+
+                {/* Purple Flower Effect for App Development */}
+                {isEnhanced && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
+                      overflow: 'hidden',
+                      zIndex: 1,
+                    }}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                        animate={{
+                          opacity: [0, 0.8, 0],
+                          scale: [0, 1, 1.2],
+                          x: [0, (Math.random() - 0.5) * 300],
+                          y: [0, (Math.random() - 0.5) * 300],
+                          rotate: [0, 360],
+                        }}
+                        transition={{
+                          duration: 4,
+                          delay: i * 0.2,
+                          repeat: 1,
+                          repeatType: 'loop',
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: isRightService ? '80%' : '50%',
+                          width: 16,
+                          height: 16,
+                          borderRadius: '50%',
+                          background: 'radial-gradient(circle at 30% 30%, #f0c9ff, #9f3dff)',
+                          mixBlendMode: 'screen',
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </motion.div>
 
               {/* Visual Element */}
               {currentService.image && currentService.title !== 'Contact Us' && (
                 <motion.div
                   initial={{ 
-                    x: currentService.side === 'right' ? -100 : 100, 
+                    x: isEnhanced ? -100 : (currentService.side === 'right' ? -100 : 100), 
                     opacity: 0,
                     scale: 0.8 
                   }}
@@ -584,122 +653,8 @@ function VideoScroll() {
         )}
       </AnimatePresence>
 
-      {/* Enhanced Navbar */}
-      <nav
-        style={{
-          position: 'fixed',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: isMobile ? '4px 8px' : '12px 24px',
-          borderRadius: '50px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '2px' : '8px',
-          zIndex: 10000,
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          width: isMobile ? 'auto' : 'auto',
-        }}
-      >
-        {isMobile ? (
-          (() => {
-            const firstStart = services[0]?.start ?? 10;
-            const isActiveHome = currentT < firstStart;
-            const activeService = services.find(s => currentT >= s.start && currentT < s.end);
-            const buttonText = isActiveHome ? 'Home' : activeService?.title || 'Section';
-            const isContact = activeService?.title === 'Contact Us';
-            const bg = isActiveHome
-              ? 'linear-gradient(135deg, #00e5ff, #0099ff)'
-              : isContact
-                ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
-                : 'linear-gradient(135deg, #00e5ff, #0099ff)';
-            return (
-              <button
-                onClick={() => scrollToTime(isActiveHome ? 0 : activeService?.start || 0)}
-                style={{
-                  background: bg,
-                  color: '#000',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 16px rgba(0, 229, 255, 0.4)',
-                }}
-              >
-                {buttonText}
-              </button>
-            );
-          })()
-        ) : (
-          <>
-            {/* Home Button for Desktop */}
-            {(() => {
-              const firstStart = services[0]?.start ?? 10;
-              const isActiveHome = currentT < firstStart;
-              return (
-                <button
-                  onClick={() => scrollToTime(0)}
-                  style={{
-                    background: isActiveHome 
-                      ? 'linear-gradient(135deg, #00e5ff, #0099ff)' 
-                      : 'transparent',
-                    color: isActiveHome ? '#000' : '#fff',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '25px',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
-                    boxShadow: isActiveHome ? '0 4px 16px rgba(0, 229, 255, 0.4)' : 'none',
-                  }}
-                >
-                  Home
-                </button>
-              );
-            })()}
-
-            {/* Service Buttons for Desktop */}
-            {services.map((s) => {
-              const isActive = currentT >= s.start && currentT < s.end;
-              const isContact = s.title === 'Contact Us';
-              return (
-                <button
-                  key={s.title}
-                  onClick={() => scrollToTime(s.start)}
-                  style={{
-                    background: isActive
-                      ? isContact
-                        ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
-                        : 'linear-gradient(135deg, #00e5ff, #0099ff)'
-                      : 'transparent',
-                    color: isActive ? '#000' : '#fff',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '25px',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
-                    boxShadow: isActive ? '0 4px 16px rgba(0, 229, 255, 0.4)' : 'none',
-                  }}
-                >
-                  {s.title}
-                </button>
-              );
-            })}
-          </>
-        )}
-      </nav>
+      {/* Navbar removed */}
+      {false && <></>}
 
       {/* Mobile Menu */}
       {false && (
@@ -808,6 +763,30 @@ function VideoScroll() {
           }}
         />
       </div>
+
+      {/* Blinking Book Now Button */}
+      <motion.a
+        href="mailto:contact@bytesplatform.io?subject=Project%20Booking"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: [1, 0.3] }}
+        transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          padding: isMobile ? '10px 20px' : '12px 28px',
+          borderRadius: '30px',
+          background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
+          color: '#fff',
+          fontSize: isMobile ? 14 : 16,
+          fontWeight: 700,
+          textDecoration: 'none',
+          boxShadow: '0 4px 16px rgba(0, 229, 255, 0.4)',
+          zIndex: 10001,
+        }}
+      >
+        Book&nbsp;Now
+      </motion.a>
     </div>
   );
 }
