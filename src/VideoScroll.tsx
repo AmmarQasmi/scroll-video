@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   useMotionValueEvent,
   useScroll,
@@ -6,6 +6,7 @@ import {
   useSpring,
   motion,
   AnimatePresence,
+  animate,
 } from 'framer-motion';
 
 // Path to the optimized video placed in /public for static serving by Vite.
@@ -24,6 +25,33 @@ interface ServiceCard {
   emoji?: string;
 }
 
+// Helper CountUp component
+function CountUp({ target, isActive }: { target: number; isActive: boolean }) {
+  const [display, setDisplay] = useState<number>(0);
+
+  useEffect(() => {
+    if (isActive) {
+      const decimals = Number.isInteger(target) ? 0 : 1;
+      animate(0, target, {
+        duration: 2,
+        ease: 'easeOut',
+        onUpdate: (v) => {
+          const formatted = decimals ? parseFloat(v.toFixed(decimals)) : Math.round(v);
+          setDisplay(formatted);
+        },
+      });
+    } else {
+      setDisplay(0);
+    }
+  }, [isActive, target]);
+
+  return (
+    <>
+      {Number.isInteger(target) ? display.toLocaleString() : display.toFixed(1)}
+    </>
+  );
+}
+
 function VideoScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,6 +63,9 @@ function VideoScroll() {
   // State for mobile menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
+  // State for mobile detection
+  const [isMobile, setIsMobile] = useState<boolean>(window.matchMedia('(max-width: 768px)').matches);
+
   // Capture scroll progress for the video section
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -44,15 +75,16 @@ function VideoScroll() {
   // Map scroll progress to video time and apply spring inertia
   const rawVideoTime = useTransform(scrollYProgress, [0, 1], [0, duration]);
   const videoTime = useSpring(rawVideoTime, {
-    stiffness: 60, // lower stiffness for smoother motion
-    damping: 20,   // controls how long it keeps moving (~2s feel)
+    stiffness: 80, // Increased stiffness for more responsive tracking
+    damping: 25,  // Slightly higher damping to reduce overshoot
   });
 
   // Track desired video time and intro overlay
   const desiredTimeRef = useRef<number>(0);
   const [showIntro, setShowIntro] = useState<boolean>(true);
-  const [isMobile, setIsMobile] = useState<boolean>(window.matchMedia('(max-width: 768px)').matches);
+  const [currentService, setCurrentService] = useState<ServiceCard | null>(null);
 
+  // Media query for mobile detection
   useEffect(() => {
     const mobileQuery = window.matchMedia('(max-width: 768px)');
     const handleChange = () => setIsMobile(mobileQuery.matches);
@@ -60,11 +92,29 @@ function VideoScroll() {
     return () => mobileQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Debounced service selection logic
+  const selectService = useCallback((t: number) => {
+    const DISPLAY_BUFFER = 1; // Reduced buffer to minimize overlap
+    const GAP = 1; // Reduced gap to ensure smooth transitions
+
+    const service = services.find((s, idx) => {
+      const start = s.start;
+      const end = s.end + DISPLAY_BUFFER;
+      const nextStart = idx < services.length - 1 ? services[idx + 1].start : Infinity;
+      return t >= start && t < Math.min(end, nextStart - GAP);
+    });
+
+    setCurrentService(service || null);
+    setShowIntro(t < 7);
+  }, []);
+
+  // Update video time and service selection
   useMotionValueEvent(videoTime, 'change', (t) => {
     desiredTimeRef.current = Math.max(0, Math.min(t, duration));
-    setShowIntro(t < 7);
+    selectService(t);
   });
 
+  // Sync video time with scroll
   useEffect(() => {
     if (!isReady) return;
     let animationId: number;
@@ -84,6 +134,7 @@ function VideoScroll() {
     return () => cancelAnimationFrame(animationId);
   }, [isReady, duration]);
 
+  // Handle video metadata loading
   const handleLoadedMetadata = () => {
     if (!videoRef.current) return;
     setDuration(videoRef.current.duration);
@@ -91,13 +142,14 @@ function VideoScroll() {
     setIsReady(true);
   };
 
+  // Initialize video settings
   useEffect(() => {
     if (!videoRef.current) return;
     videoRef.current.pause();
     videoRef.current.muted = true;
   }, []);
 
-  // Enhanced service data with more detailed content
+  // Service data
   const services: ServiceCard[] = [
     {
       start: 20,
@@ -196,14 +248,7 @@ function VideoScroll() {
     },
   ];
 
-  const [currentT, setCurrentT] = useState<number>(0);
-  const DISPLAY_BUFFER = 2; // seconds to extend each component visibility
-  const GAP = 2; // seconds gap between successive cards
-
-  useMotionValueEvent(videoTime, 'change', (t) => {
-    setCurrentT(t);
-  });
-
+  // Scroll to specific time
   const scrollToTime = (time: number) => {
     if (!containerRef.current || duration === 0) return;
 
@@ -221,22 +266,14 @@ function VideoScroll() {
     if (videoRef.current) {
       videoRef.current.currentTime = time;
     }
-    setCurrentT(time);
-    setIsMenuOpen(false); // Close menu on navigation
+    selectService(time);
+    setIsMenuOpen(false);
 
     window.scrollTo({ top: targetY, behavior: 'smooth' });
   };
 
-  // Get current active service
-  const currentService = services.find((s, idx) => {
-    const start = s.start;
-    const end = s.end + DISPLAY_BUFFER;
-    const nextStart = idx < services.length - 1 ? services[idx + 1].start : Infinity;
-    return currentT >= start && currentT < end && currentT < nextStart - GAP;
-  });
-
-  const isEnhanced = currentService && (currentService.title as string) !== 'Contact Us';
-  const isRightService = currentService && ['Web Development', 'Social Media Marketing'].includes(currentService.title as string);
+  const isEnhanced = currentService && currentService.title !== 'Contact Us';
+  const isRightService = currentService && ['Web Development', 'Social Media Marketing'].includes(currentService.title);
 
   return (
     <div
@@ -309,7 +346,7 @@ function VideoScroll() {
             >
               <div
                 style={{
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontFamily: 'Vidaloka, Georgia, serif',
                   fontWeight: 900,
                   fontSize: isMobile ? 'clamp(32px, 10vw, 48px)' : 'clamp(48px, 12vw, 140px)',
                   color: '#ffffff',
@@ -326,7 +363,7 @@ function VideoScroll() {
               </div>
               <div
                 style={{
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                   fontWeight: 300,
                   fontSize: isMobile ? 'clamp(12px, 3vw, 16px)' : 'clamp(16px, 4vw, 28px)',
                   color: '#ffffff',
@@ -364,7 +401,7 @@ function VideoScroll() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
             style={{
               position: 'fixed',
               top: 0,
@@ -377,7 +414,7 @@ function VideoScroll() {
               pointerEvents: isMobile ? 'auto' : 'none',
               overflowY: isMobile ? 'auto' : 'visible',
               zIndex: 50,
-              padding: isMobile ? '16px 8px 8px' : '0 16px', // no navbar now
+              padding: isMobile ? '16px 8px 8px' : '0 16px',
             }}
           >
             <div
@@ -398,7 +435,7 @@ function VideoScroll() {
                   opacity: 0,
                 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
                 style={{
                   order: currentService.side === 'right' ? 2 : 1,
                   textAlign: currentService.side === 'center' ? 'center' : 'left',
@@ -410,10 +447,11 @@ function VideoScroll() {
                 <motion.h1
                   initial={{ y: isEnhanced ? -60 : 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                   style={{
+                    fontFamily: 'Vidaloka, Georgia, serif',
                     fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(32px, 6vw, 64px)',
-                    fontWeight: 900,
+                    fontWeight: 400,
                     color: '#ffffff',
                     marginBottom: isMobile ? 12 : 16,
                     lineHeight: 1.1,
@@ -433,8 +471,9 @@ function VideoScroll() {
                 <motion.p
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
                   style={{
+                    fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                     fontSize: isMobile ? 'clamp(14px, 2.5vw, 16px)' : 'clamp(16px, 2.5vw, 24px)',
                     color: '#ffffff',
                     opacity: 0.9,
@@ -451,7 +490,7 @@ function VideoScroll() {
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.6 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
                   style={{ marginBottom: isMobile ? 24 : 32 }}
                 >
                   {currentService.features.map((feature, idx) => (
@@ -459,7 +498,7 @@ function VideoScroll() {
                       key={idx}
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.6 + idx * 0.1, duration: 0.4 }}
+                      transition={{ delay: 0.5 + idx * 0.1, duration: 0.3 }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -467,6 +506,7 @@ function VideoScroll() {
                         fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
                         color: '#ffffff',
                         opacity: 0.85,
+                        fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                       }}
                     >
                       <div
@@ -489,7 +529,7 @@ function VideoScroll() {
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.7, duration: 0.6 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
                     style={{
                       display: 'flex',
                       gap: isMobile ? '0.75rem' : '2rem',
@@ -502,16 +542,32 @@ function VideoScroll() {
                       <div key={idx} style={{ textAlign: 'center' }}>
                         <div
                           style={{
+                            fontFamily: 'Vidaloka, Georgia, serif',
                             fontSize: isMobile ? 'clamp(16px, 4vw, 20px)' : 'clamp(24px, 4vw, 36px)',
-                            fontWeight: 900,
+                            fontWeight: 400,
                             color: '#00e5ff',
                             textShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
                           }}
                         >
-                          {stat.value}
+                          {(() => {
+                            const match = stat.value.match(/([^0-9]*)([0-9.,]*\.?[0-9]+)(.*)/);
+                            if (!match) return stat.value;
+                            const prefix = match[1];
+                            const num = parseFloat(match[2].replace(/,/g, ''));
+                            if (isNaN(num)) return stat.value;
+                            const suffix = match[3];
+                            return (
+                              <>
+                                {prefix}
+                                <CountUp target={num} isActive={!!currentService} />
+                                {suffix}
+                              </>
+                            );
+                          })()}
                         </div>
                         <div
                           style={{
+                            fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                             fontSize: isMobile ? 'clamp(9px, 1.5vw, 11px)' : 'clamp(12px, 1.5vw, 16px)',
                             color: '#ffffff',
                             opacity: 0.7,
@@ -531,7 +587,7 @@ function VideoScroll() {
                     href="mailto:contact@bytesplatform.io"
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.8, duration: 0.4 }}
+                    transition={{ delay: 0.7, duration: 0.4 }}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -540,6 +596,7 @@ function VideoScroll() {
                       minWidth: isMobile ? 48 : undefined,
                       minHeight: isMobile ? 48 : undefined,
                       borderRadius: '25px',
+                      fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                       fontSize: isMobile ? 16 : 14,
                       background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
                       color: '#000',
@@ -613,7 +670,7 @@ function VideoScroll() {
                     scale: 0.8 
                   }}
                   animate={{ x: 0, opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
                   style={{
                     order: isMobile ? 1 : currentService.side === 'right' ? 1 : 2,
                     display: 'flex',
@@ -653,90 +710,6 @@ function VideoScroll() {
         )}
       </AnimatePresence>
 
-      {/* Navbar removed */}
-      {false && <></>}
-
-      {/* Mobile Menu */}
-      {false && (
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                position: 'fixed',
-                top: '80px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                padding: '16px',
-                borderRadius: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                zIndex: 9999,
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                width: '90%',
-                maxWidth: '400px',
-              }}
-            >
-              <button
-                onClick={() => scrollToTime(0)}
-                style={{
-                  background: currentT < services[0]?.start 
-                    ? 'linear-gradient(135deg, #00e5ff, #0099ff)' 
-                    : 'transparent',
-                  color: currentT < services[0]?.start ? '#000' : '#fff',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '25px',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  textAlign: 'left',
-                }}
-              >
-                Home
-              </button>
-              {services.map((s) => {
-                const isActive = currentT >= s.start && currentT < s.end;
-                const isContact = s.title === 'Contact Us';
-                return (
-                  <button
-                    key={s.title}
-                    onClick={() => scrollToTime(s.start)}
-                    style={{
-                      background: isActive
-                        ? isContact
-                          ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
-                          : 'linear-gradient(135deg, #00e5ff, #0099ff)'
-                        : 'transparent',
-                      color: isActive ? '#000' : '#fff',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '25px',
-                      fontSize: 16,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {s.title}
-                  </button>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
-
       {/* Progress indicator */}
       <div
         style={{
@@ -754,7 +727,7 @@ function VideoScroll() {
       >
         <div
           style={{
-            width: `${(currentT / duration) * 100}%`,
+            width: `${(desiredTimeRef.current / duration) * 100}%`,
             height: '100%',
             background: 'linear-gradient(90deg, #00e5ff, #0099ff)',
             borderRadius: '2px',
@@ -783,9 +756,10 @@ function VideoScroll() {
           textDecoration: 'none',
           boxShadow: '0 4px 16px rgba(0, 229, 255, 0.4)',
           zIndex: 10001,
+          fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
         }}
       >
-        Book&nbsp;Now
+        Book Now
       </motion.a>
     </div>
   );
