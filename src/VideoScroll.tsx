@@ -6,15 +6,6 @@ import {
   motion,
   AnimatePresence,
 } from 'framer-motion';
-import {
-  FaMobileAlt,
-  FaGlobe,
-  FaSearch,
-  FaChartLine,
-  FaEnvelope,
-  FaArrowRight,
-  FaPlay,
-} from 'react-icons/fa';
 
 // Path to the optimized video placed in /public for static serving by Vite.
 const VIDEO_SRC = '/landingVideo_1080.mp4';
@@ -39,6 +30,9 @@ function VideoScroll() {
   // State for video duration and readiness
   const [duration, setDuration] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(false);
+
+  // State for mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   // Capture scroll progress for the video section
   const { scrollYProgress } = useScroll({
@@ -221,6 +215,7 @@ function VideoScroll() {
       videoRef.current.currentTime = time;
     }
     setCurrentT(time);
+    setIsMenuOpen(false); // Close menu on navigation
 
     window.scrollTo({ top: targetY, behavior: 'smooth' });
   };
@@ -288,6 +283,7 @@ function VideoScroll() {
               pointerEvents: 'none',
               textAlign: 'center',
               zIndex: 100,
+              padding: isMobile ? '0 16px' : '0',
             }}
           >
             <motion.div
@@ -300,9 +296,9 @@ function VideoScroll() {
                 style={{
                   fontFamily: 'system-ui, -apple-system, sans-serif',
                   fontWeight: 900,
-                  fontSize: 'clamp(48px, 12vw, 140px)',
+                  fontSize: isMobile ? 'clamp(32px, 10vw, 48px)' : 'clamp(48px, 12vw, 140px)',
                   color: '#ffffff',
-                  letterSpacing: '-3px',
+                  letterSpacing: isMobile ? '-1px' : '-3px',
                   textShadow: '0 8px 32px rgba(0,0,0,0.8)',
                   marginBottom: 8,
                   background: 'linear-gradient(135deg, #ffffff, #00e5ff)',
@@ -317,7 +313,7 @@ function VideoScroll() {
                 style={{
                   fontFamily: 'system-ui, -apple-system, sans-serif',
                   fontWeight: 300,
-                  fontSize: 'clamp(16px, 4vw, 28px)',
+                  fontSize: isMobile ? 'clamp(12px, 3vw, 16px)' : 'clamp(16px, 4vw, 28px)',
                   color: '#ffffff',
                   letterSpacing: '0.3em',
                   textShadow: '0 4px 16px rgba(0,0,0,0.6)',
@@ -331,8 +327,8 @@ function VideoScroll() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
                 style={{
-                  marginTop: 24,
-                  fontSize: 'clamp(14px, 2vw, 18px)',
+                  marginTop: isMobile ? 16 : 24,
+                  fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
                   color: '#ffffff',
                   opacity: 0.8,
                   fontWeight: 300,
@@ -363,18 +359,21 @@ function VideoScroll() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              pointerEvents: 'none',
+              pointerEvents: isMobile ? 'auto' : 'none',
+              overflowY: isMobile ? 'auto' : 'visible',
               zIndex: 50,
+              padding: isMobile ? '40px 8px 8px' : '0 16px', // further reduced top padding for mobile
             }}
           >
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                gap: isMobile ? '2rem' : '4rem',
-                maxWidth: '1400px',
-                width: '90%',
-                alignItems: 'center',
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '1.5rem' : '4rem',
+                maxWidth: isMobile ? '100%' : '1400px',
+                width: '100%',
+                alignItems: isMobile ? 'center' : 'center',
+                justifyContent: 'center',
               }}
             >
               {/* Text Content */}
@@ -385,44 +384,23 @@ function VideoScroll() {
                 style={{
                   order: currentService.side === 'right' ? 2 : 1,
                   textAlign: currentService.side === 'center' ? 'center' : 'left',
+                  width: isMobile ? '100%' : '50%',
+                  maxWidth: isMobile ? '400px' : 'none',
                 }}
               >
-                {/* Service Icon */}
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.2, duration: 0.6, type: 'spring' }}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 24,
-                    boxShadow: '0 8px 32px rgba(0, 229, 255, 0.4)',
-                  }}
-                >
-                  {currentService.title === 'App Development' ? <FaMobileAlt size={32} color="#000" />
-                    : currentService.title === 'Web Development' ? <FaGlobe size={32} color="#000" />
-                    : currentService.title === 'Search Engine Optimization' ? <FaSearch size={32} color="#000" />
-                    : currentService.title === 'Social Media Marketing' ? <FaChartLine size={32} color="#000" />
-                    : <FaEnvelope size={32} color="#000" />}
-                </motion.div>
-
                 {/* Title */}
                 <motion.h1
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                   style={{
-                    fontSize: 'clamp(32px, 6vw, 64px)',
+                    fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(32px, 6vw, 64px)',
                     fontWeight: 800,
                     color: '#ffffff',
-                    marginBottom: 16,
+                    marginBottom: isMobile ? 12 : 16,
                     lineHeight: 1.1,
                     textShadow: '0 4px 16px rgba(0,0,0,0.8)',
+                    textAlign: currentService.side === 'center' ? 'center' : 'left',
                   }}
                 >
                   {currentService.title}
@@ -434,12 +412,13 @@ function VideoScroll() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
                   style={{
-                    fontSize: 'clamp(16px, 2.5vw, 24px)',
+                    fontSize: isMobile ? 'clamp(14px, 2.5vw, 16px)' : 'clamp(16px, 2.5vw, 24px)',
                     color: '#ffffff',
                     opacity: 0.9,
-                    marginBottom: 32,
+                    marginBottom: isMobile ? 24 : 32,
                     lineHeight: 1.6,
                     fontWeight: 300,
+                    textAlign: currentService.side === 'center' ? 'center' : 'left',
                   }}
                 >
                   {currentService.desc}
@@ -450,7 +429,7 @@ function VideoScroll() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  style={{ marginBottom: 32 }}
+                  style={{ marginBottom: isMobile ? 24 : 32 }}
                 >
                   {currentService.features.map((feature, idx) => (
                     <motion.div
@@ -462,7 +441,7 @@ function VideoScroll() {
                         display: 'flex',
                         alignItems: 'center',
                         marginBottom: 12,
-                        fontSize: 'clamp(14px, 2vw, 18px)',
+                        fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
                         color: '#ffffff',
                         opacity: 0.85,
                       }}
@@ -490,16 +469,17 @@ function VideoScroll() {
                     transition={{ delay: 0.7, duration: 0.6 }}
                     style={{
                       display: 'flex',
-                      gap: '2rem',
+                      gap: isMobile ? '0.75rem' : '2rem',
                       flexWrap: 'wrap',
-                      marginBottom: 32,
+                      marginBottom: isMobile ? 24 : 32,
+                      justifyContent: currentService.side === 'center' ? 'center' : 'flex-start',
                     }}
                   >
                     {currentService.stats.map((stat, idx) => (
                       <div key={idx} style={{ textAlign: 'center' }}>
                         <div
                           style={{
-                            fontSize: 'clamp(24px, 4vw, 36px)',
+                            fontSize: isMobile ? 'clamp(16px, 4vw, 20px)' : 'clamp(24px, 4vw, 36px)',
                             fontWeight: 800,
                             color: '#00e5ff',
                             textShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
@@ -509,7 +489,7 @@ function VideoScroll() {
                         </div>
                         <div
                           style={{
-                            fontSize: 'clamp(12px, 1.5vw, 16px)',
+                            fontSize: isMobile ? 'clamp(9px, 1.5vw, 11px)' : 'clamp(12px, 1.5vw, 16px)',
                             color: '#ffffff',
                             opacity: 0.7,
                             fontWeight: 300,
@@ -537,7 +517,7 @@ function VideoScroll() {
                       minWidth: isMobile ? 48 : undefined,
                       minHeight: isMobile ? 48 : undefined,
                       borderRadius: '25px',
-                      fontSize: isMobile ? 18 : 14,
+                      fontSize: isMobile ? 16 : 14,
                       background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
                       color: '#000',
                       fontWeight: 700,
@@ -545,11 +525,12 @@ function VideoScroll() {
                       boxShadow: '0 8px 32px rgba(0, 229, 255, 0.4)',
                       transition: 'transform 0.2s ease',
                       pointerEvents: 'auto',
+                      margin: currentService.side === 'center' ? '0 auto' : '0',
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   >
-                    Get Started <FaArrowRight />
+                    Get Started →
                   </motion.a>
                 )}
               </motion.div>
@@ -565,16 +546,18 @@ function VideoScroll() {
                   animate={{ x: 0, opacity: 1, scale: 1 }}
                   transition={{ duration: 0.8, ease: 'easeOut' }}
                   style={{
-                    order: currentService.side === 'right' ? 1 : 2,
+                    order: isMobile ? 1 : currentService.side === 'right' ? 1 : 2,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    width: isMobile ? '100%' : '50%',
+                    maxWidth: isMobile ? '120px' : '400px',
                   }}
                 >
                   <div
                     style={{
                       width: '100%',
-                      maxWidth: 400,
+                      maxWidth: isMobile ? '120px' : '400px',
                       aspectRatio: '1',
                       borderRadius: 24,
                       overflow: 'hidden',
@@ -611,87 +594,193 @@ function VideoScroll() {
           background: 'rgba(0, 0, 0, 0.3)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          padding: '12px 24px',
+          padding: isMobile ? '4px 8px' : '12px 24px',
           borderRadius: '50px',
           display: 'flex',
-          gap: '8px',
+          alignItems: 'center',
+          gap: isMobile ? '2px' : '8px',
           zIndex: 10000,
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          width: isMobile ? 'auto' : 'auto',
         }}
       >
-        {/* Home Button */}
-        {(() => {
-          const firstStart = services[0]?.start ?? 10;
-          const isActiveHome = currentT < firstStart;
-          if (isMobile && !isActiveHome) {
-            return null; // mobile: show Home only when active
-          }
-          return (
-            <button
-              onClick={() => scrollToTime(0)}
-              style={{
-                background: isActiveHome 
-                  ? 'linear-gradient(135deg, #00e5ff, #0099ff)' 
-                  : 'transparent',
-                color: isActiveHome ? '#000' : '#fff',
-                border: 'none',
-                padding: isMobile ? '12px 24px' : '8px 16px',
-                minWidth: isMobile ? 48 : undefined,
-                minHeight: isMobile ? 48 : undefined,
-                borderRadius: '25px',
-                fontSize: isMobile ? 18 : 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                whiteSpace: 'nowrap',
-                boxShadow: isActiveHome ? '0 4px 16px rgba(0, 229, 255, 0.4)' : 'none',
-              }}
-            >
-              Home
-            </button>
-          );
-        })()}
+        {isMobile ? (
+          (() => {
+            const firstStart = services[0]?.start ?? 10;
+            const isActiveHome = currentT < firstStart;
+            const activeService = services.find(s => currentT >= s.start && currentT < s.end);
+            const buttonText = isActiveHome ? 'Home' : activeService?.title || 'Section';
+            const isContact = activeService?.title === 'Contact Us';
+            const bg = isActiveHome
+              ? 'linear-gradient(135deg, #00e5ff, #0099ff)'
+              : isContact
+                ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
+                : 'linear-gradient(135deg, #00e5ff, #0099ff)';
+            return (
+              <button
+                onClick={() => scrollToTime(isActiveHome ? 0 : activeService?.start || 0)}
+                style={{
+                  background: bg,
+                  color: '#000',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 16px rgba(0, 229, 255, 0.4)',
+                }}
+              >
+                {buttonText}
+              </button>
+            );
+          })()
+        ) : (
+          <>
+            {/* Home Button for Desktop */}
+            {(() => {
+              const firstStart = services[0]?.start ?? 10;
+              const isActiveHome = currentT < firstStart;
+              return (
+                <button
+                  onClick={() => scrollToTime(0)}
+                  style={{
+                    background: isActiveHome 
+                      ? 'linear-gradient(135deg, #00e5ff, #0099ff)' 
+                      : 'transparent',
+                    color: isActiveHome ? '#000' : '#fff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '25px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                    boxShadow: isActiveHome ? '0 4px 16px rgba(0, 229, 255, 0.4)' : 'none',
+                  }}
+                >
+                  Home
+                </button>
+              );
+            })()}
 
-        {services.map((s, idx) => {
-          const isActive = currentT >= s.start && currentT < s.end;
-          const isContact = s.title === 'Contact Us';
-          if (isMobile && !isActive) {
-            return null; // mobile: hide inactive section buttons
-          }
-          return (
-            <button
-              key={s.title}
-              onClick={() => scrollToTime(s.start)}
+            {/* Service Buttons for Desktop */}
+            {services.map((s) => {
+              const isActive = currentT >= s.start && currentT < s.end;
+              const isContact = s.title === 'Contact Us';
+              return (
+                <button
+                  key={s.title}
+                  onClick={() => scrollToTime(s.start)}
+                  style={{
+                    background: isActive
+                      ? isContact
+                        ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
+                        : 'linear-gradient(135deg, #00e5ff, #0099ff)'
+                      : 'transparent',
+                    color: isActive ? '#000' : '#fff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '25px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                    boxShadow: isActive ? '0 4px 16px rgba(0, 229, 255, 0.4)' : 'none',
+                  }}
+                >
+                  {s.title}
+                </button>
+              );
+            })}
+          </>
+        )}
+      </nav>
+
+      {/* Mobile Menu */}
+      {false && (
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
               style={{
-                background: isActive
-                  ? isContact
-                    ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
-                    : 'linear-gradient(135deg, #00e5ff, #0099ff)'
-                  : 'transparent',
-                color: isActive ? '#000' : '#fff',
-                border: 'none',
-                padding: isMobile ? '12px 24px' : '8px 16px',
-                minWidth: isMobile ? 48 : undefined,
-                minHeight: isMobile ? 48 : undefined,
-                borderRadius: '25px',
-                fontSize: isMobile ? 18 : 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                whiteSpace: 'nowrap',
-                boxShadow: isActive
-                  ? isContact
-                    ? '0 4px 16px rgba(255, 77, 79, 0.4)'
-                    : '0 4px 16px rgba(0, 229, 255, 0.4)'
-                  : 'none',
+                position: 'fixed',
+                top: '80px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                padding: '16px',
+                borderRadius: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                zIndex: 9999,
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                width: '90%',
+                maxWidth: '400px',
               }}
             >
-              {s.title}
-            </button>
-          );
-        })}
-      </nav>
+              <button
+                onClick={() => scrollToTime(0)}
+                style={{
+                  background: currentT < services[0]?.start 
+                    ? 'linear-gradient(135deg, #00e5ff, #0099ff)' 
+                    : 'transparent',
+                  color: currentT < services[0]?.start ? '#000' : '#fff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '25px',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  textAlign: 'left',
+                }}
+              >
+                Home
+              </button>
+              {services.map((s) => {
+                const isActive = currentT >= s.start && currentT < s.end;
+                const isContact = s.title === 'Contact Us';
+                return (
+                  <button
+                    key={s.title}
+                    onClick={() => scrollToTime(s.start)}
+                    style={{
+                      background: isActive
+                        ? isContact
+                          ? 'linear-gradient(135deg, #ff4d4f, #ff7875)'
+                          : 'linear-gradient(135deg, #00e5ff, #0099ff)'
+                        : 'transparent',
+                      color: isActive ? '#000' : '#fff',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '25px',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {s.title}
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Progress indicator */}
       <div
@@ -700,7 +789,7 @@ function VideoScroll() {
           bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '200px',
+          width: isMobile ? '80%' : '200px',
           height: '4px',
           background: 'rgba(255, 255, 255, 0.2)',
           borderRadius: '2px',
