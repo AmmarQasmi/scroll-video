@@ -52,6 +52,30 @@ function CountUp({ target, isActive }: { target: number; isActive: boolean }) {
   );
 }
 
+// Inject keyframes for App Development title shine once
+if (typeof document !== 'undefined' && !document.getElementById('appdev-gradient-style')) {
+  const style = document.createElement('style');
+  style.id = 'appdev-gradient-style';
+  style.textContent = `@keyframes AppDevGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }`;
+  document.head.appendChild(style);
+}
+
+// Inject global keyframes for golden shine effect applied to all headings
+if (typeof document !== 'undefined' && !document.getElementById('gold-shine-style')) {
+  const goldStyle = document.createElement('style');
+  goldStyle.id = 'gold-shine-style';
+  goldStyle.textContent = `@keyframes GoldShine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }`;
+  document.head.appendChild(goldStyle);
+}
+
 function VideoScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -156,13 +180,11 @@ function VideoScroll() {
       end: 26,
       side: 'left',
       title: 'App Development',
-      desc: 'Transform your ideas into powerful mobile experiences',
+      desc: 'Build impactful mobile apps',
       features: [
-        'Native iOS & Android Development',
-        'Cross-platform React Native & Flutter',
-        'Progressive Web Apps (PWA)',
-        'App Store Optimization & Launch',
-        'Real-time Analytics Integration'
+        'Native iOS & Android',
+        'Cross-platform React Native',
+        'App Launch & ASO'
       ],
       stats: [
         { label: 'Apps Launched', value: '150+' },
@@ -176,13 +198,11 @@ function VideoScroll() {
       end: 38,
       side: 'right',
       title: 'Web Development',
-      desc: 'Lightning-fast websites that convert visitors into customers',
+      desc: 'Create lightning-fast websites',
       features: [
-        'Next.js & React Development',
-        'Jamstack Architecture',
-        'Headless CMS Integration',
-        'E-commerce Solutions',
-        'Performance Optimization'
+        'Next.js / React',
+        'Jamstack builds',
+        'E-commerce solutions'
       ],
       stats: [
         { label: 'Load Time', value: '<1s' },
@@ -195,14 +215,12 @@ function VideoScroll() {
       start: 44,
       end: 50,
       side: 'left',
-      title: 'Search Engine Optimization',
-      desc: 'Dominate search results and drive organic traffic',
+      title: 'SEO',
+      desc: 'Boost organic search visibility',
       features: [
-        'Technical SEO Audits',
-        'Core Web Vitals Optimization',
-        'Schema Markup Implementation',
-        'Backlink Strategy & Outreach',
-        'Local SEO & Google My Business'
+        'SEO audits',
+        'Core Web Vitals',
+        'Backlink outreach'
       ],
       stats: [
         { label: 'Avg. Ranking Improvement', value: '+250%' },
@@ -216,13 +234,11 @@ function VideoScroll() {
       end: 62,
       side: 'right',
       title: 'Social Media Marketing',
-      desc: 'Build communities and amplify your brand across all platforms',
+      desc: 'Grow your brand on social',
       features: [
-        'Content Strategy & Creation',
-        'Paid Advertising Campaigns',
-        'Community Management',
-        'Influencer Partnerships',
-        'Analytics & Performance Tracking'
+        'Content strategy',
+        'Paid campaigns',
+        'Community management'
       ],
       stats: [
         { label: 'Engagement Rate', value: '+320%' },
@@ -236,13 +252,11 @@ function VideoScroll() {
       end: 75,
       side: 'center',
       title: 'Contact Us',
-      desc: 'Ready to transform your digital presence?',
+      desc: 'Ready to get started?',
       features: [
-        'Free 30-minute consultation',
-        'Custom project proposal',
-        '24/7 support available',
-        'Transparent pricing',
-        'Money-back guarantee'
+        'Free 30-min consult',
+        'Custom proposal',
+        '24/7 support'
       ],
       image: '/contact.gif',
     },
@@ -273,6 +287,7 @@ function VideoScroll() {
   };
 
   const isEnhanced = currentService && currentService.title !== 'Contact Us';
+  const isAppDev = currentService?.title === 'App Development';
   const isRightService = currentService && ['Web Development', 'Social Media Marketing'].includes(currentService.title);
 
   return (
@@ -348,18 +363,15 @@ function VideoScroll() {
                 style={{
                   fontFamily: 'Vidaloka, Georgia, serif',
                   fontWeight: 900,
-                  fontSize: isMobile ? 'clamp(32px, 10vw, 48px)' : 'clamp(48px, 12vw, 140px)',
-                  color: '#ffffff',
+                  fontSize: isMobile ? 'clamp(36px, 11vw, 54px)' : 'clamp(54px, 13vw, 150px)',
+                  color: '#ffd65a',
                   letterSpacing: isMobile ? '-1px' : '-3px',
-                  textShadow: '0 8px 32px rgba(0,0,0,0.8)',
+                  textShadow: '0 8px 24px rgba(0,0,0,0.7)',
                   marginBottom: 8,
-                  background: 'linear-gradient(135deg, #ffffff, #00e5ff)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  background: 'none',
                 }}
               >
-                BYTES<span style={{ color: '#00e5ff' }}>.</span>
+                BYTES<span style={{ color: '#ffd65a' }}>.</span>
               </div>
               <div
                 style={{
@@ -450,18 +462,15 @@ function VideoScroll() {
                   transition={{ delay: 0.2, duration: 0.5 }}
                   style={{
                     fontFamily: 'Vidaloka, Georgia, serif',
-                    fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(32px, 6vw, 64px)',
+                    fontSize: isMobile ? 'clamp(32px, 8vw, 56px)' : 'clamp(56px, 8vw, 112px)',
                     fontWeight: 400,
-                    color: '#ffffff',
+                    color: '#ffd65a',
                     marginBottom: isMobile ? 12 : 16,
                     lineHeight: 1.1,
                     textShadow: '0 4px 16px rgba(0,0,0,0.8)',
                     textAlign: currentService.side === 'center' ? 'center' : 'left',
-                    background: isEnhanced
-                      ? 'linear-gradient(90deg, #a6f9ff, #d4b0ff)'
-                      : 'none',
-                    WebkitBackgroundClip: isEnhanced ? 'text' : undefined,
-                    WebkitTextFillColor: isEnhanced ? 'transparent' : undefined,
+                    background: 'none',
+                    animation: undefined,
                   }}
                 >
                   {currentService.title}
@@ -476,7 +485,7 @@ function VideoScroll() {
                     fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                     fontSize: isMobile ? 'clamp(14px, 2.5vw, 16px)' : 'clamp(16px, 2.5vw, 24px)',
                     color: '#ffffff',
-                    opacity: 0.9,
+                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
                     marginBottom: isMobile ? 24 : 32,
                     lineHeight: 1.6,
                     fontWeight: 300,
@@ -505,6 +514,7 @@ function VideoScroll() {
                         marginBottom: 12,
                         fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
                         color: '#ffffff',
+                        textShadow: '0 2px 6px rgba(0,0,0,0.6)',
                         opacity: 0.85,
                         fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                       }}
@@ -514,9 +524,9 @@ function VideoScroll() {
                           width: 6,
                           height: 6,
                           borderRadius: '50%',
-                          background: '#00e5ff',
+                          background: '#FBBF24',
                           marginRight: 16,
-                          boxShadow: '0 0 8px rgba(0, 229, 255, 0.6)',
+                          boxShadow: '0 0 8px rgba(251, 191, 36, 0.6)',
                         }}
                       />
                       {feature}
@@ -543,10 +553,10 @@ function VideoScroll() {
                         <div
                           style={{
                             fontFamily: 'Vidaloka, Georgia, serif',
-                            fontSize: isMobile ? 'clamp(16px, 4vw, 20px)' : 'clamp(24px, 4vw, 36px)',
-                            fontWeight: 400,
-                            color: '#00e5ff',
-                            textShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
+                            fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(36px, 6vw, 56px)',
+                            color: '#ffd65a',
+                            textShadow: '0 0 8px rgba(255, 214, 90, 0.6)',
+                            background: 'none',
                           }}
                         >
                           {(() => {
@@ -568,7 +578,7 @@ function VideoScroll() {
                         <div
                           style={{
                             fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-                            fontSize: isMobile ? 'clamp(9px, 1.5vw, 11px)' : 'clamp(12px, 1.5vw, 16px)',
+                            fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(16px, 2vw, 20px)',
                             color: '#ffffff',
                             opacity: 0.7,
                             fontWeight: 300,
@@ -598,11 +608,11 @@ function VideoScroll() {
                       borderRadius: '25px',
                       fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
                       fontSize: isMobile ? 16 : 14,
-                      background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
-                      color: '#000',
+                      background: 'linear-gradient(135deg, #fff4d2, #ffd65a)',
+                      color: '#000000',
                       fontWeight: 700,
                       textDecoration: 'none',
-                      boxShadow: '0 8px 32px rgba(0, 229, 255, 0.4)',
+                      boxShadow: '0 8px 32px rgba(255, 214, 90, 0.4)',
                       transition: 'transform 0.2s ease',
                       pointerEvents: 'auto',
                       margin: currentService.side === 'center' ? '0 auto' : '0',
@@ -652,7 +662,7 @@ function VideoScroll() {
                           width: 16,
                           height: 16,
                           borderRadius: '50%',
-                          background: 'radial-gradient(circle at 30% 30%, #f0c9ff, #9f3dff)',
+                          background: 'radial-gradient(circle at 30% 30%, #fff4d2, #ffd65a)',
                           mixBlendMode: 'screen',
                         }}
                       />
@@ -682,15 +692,16 @@ function VideoScroll() {
                 >
                   <div
                     style={{
+                      position: 'relative',
                       width: '100%',
                       maxWidth: isMobile ? '120px' : '400px',
                       aspectRatio: '1',
                       borderRadius: 24,
                       overflow: 'hidden',
-                      boxShadow: '0 20px 60px rgba(0, 229, 255, 0.2)',
-                      border: '1px solid rgba(0, 229, 255, 0.3)',
-                      background: 'rgba(0, 229, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
+                      boxShadow: 'none',
+                      border: 'none',
+                      background: 'transparent',
+                      backdropFilter: 'none',
                     }}
                   >
                     <img
@@ -700,6 +711,7 @@ function VideoScroll() {
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
+                        mixBlendMode: 'screen',
                       }}
                     />
                   </div>
@@ -717,7 +729,7 @@ function VideoScroll() {
           bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: isMobile ? '80%' : '200px',
+          width: isMobile ? '80%' : '300px',
           height: '4px',
           background: 'rgba(255, 255, 255, 0.2)',
           borderRadius: '2px',
@@ -729,34 +741,45 @@ function VideoScroll() {
           style={{
             width: `${(desiredTimeRef.current / duration) * 100}%`,
             height: '100%',
-            background: 'linear-gradient(90deg, #00e5ff, #0099ff)',
+            background: 'linear-gradient(90deg, #93C5FD, #FBBF24)',
             borderRadius: '2px',
             transition: 'width 0.1s ease',
-            boxShadow: '0 0 8px rgba(0, 229, 255, 0.6)',
+            boxShadow: '0 0 8px rgba(255, 214, 90, 0.6)',
           }}
         />
       </div>
 
-      {/* Blinking Book Now Button */}
+      {/* Blinking Book Now Button – fixed position */}
       <motion.a
         href="mailto:contact@bytesplatform.io?subject=Project%20Booking"
         initial={{ opacity: 1 }}
-        animate={{ opacity: [1, 0.3] }}
-        transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
+        animate={{ opacity: [1, 0.35] }}
+        transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         style={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          padding: isMobile ? '10px 20px' : '12px 28px',
-          borderRadius: '30px',
-          background: 'linear-gradient(135deg, #00e5ff, #0099ff)',
-          color: '#fff',
-          fontSize: isMobile ? 14 : 16,
+          bottom: isMobile ? '24px' : '20px',
+          right: isMobile ? '24px' : '20px',
+          padding: isMobile ? '14px 28px' : '14px 32px',
+          borderRadius: '32px',
+          background: 'linear-gradient(135deg, #fff4d2, #ffd65a)',
+          color: '#000000',
           fontWeight: 700,
+          fontSize: isMobile ? 14 : 16,
           textDecoration: 'none',
-          boxShadow: '0 4px 16px rgba(0, 229, 255, 0.4)',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
           zIndex: 10001,
           fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
+          transition: 'background 0.25s ease, color 0.25s ease, transform 0.25s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = '#ffd65a';
+          e.currentTarget.style.color = '#ffffff';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'linear-gradient(135deg, #fff4d2, #ffd65a)';
+          e.currentTarget.style.color = '#000000';
+          e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
         Book Now
