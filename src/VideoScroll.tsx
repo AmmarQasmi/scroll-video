@@ -52,6 +52,76 @@ function CountUp({ target, isActive }: { target: number; isActive: boolean }) {
   );
 }
 
+// Inject keyframes for futuristic tech effects
+if (typeof document !== 'undefined' && !document.getElementById('tech-effects-style')) {
+  const style = document.createElement('style');
+  style.id = 'tech-effects-style';
+  style.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@100;200;300;400;500;600;700;800;900&display=swap');
+    
+    @keyframes NeonGlow {
+      0%, 100% { 
+        text-shadow: 
+          0 0 2px #00ffff,
+          0 0 4px #00ffff,
+          0 0 6px #00ffff;
+      }
+      50% { 
+        text-shadow: 
+          0 0 1px #00ffff,
+          0 0 3px #00ffff,
+          0 0 5px #00ffff;
+      }
+    }
+    
+    @keyframes CyberGlow {
+      0%, 100% { 
+        text-shadow: 
+          0 0 2px #ff00ff,
+          0 0 4px #ff00ff,
+          0 0 6px #ff00ff;
+      }
+      50% { 
+        text-shadow: 
+          0 0 1px #ff00ff,
+          0 0 3px #ff00ff,
+          0 0 5px #ff00ff;
+      }
+    }
+    
+    @keyframes DataStream {
+      0% { transform: translateY(-100%); opacity: 0; }
+      50% { opacity: 0.3; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+    
+    @keyframes ScanLine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100vw); }
+    }
+    
+    .tech-text {
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    
+    .cyber-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+    
+    .futuristic-text {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 // Inject keyframes for App Development title shine once
 if (typeof document !== 'undefined' && !document.getElementById('appdev-gradient-style')) {
   const style = document.createElement('style');
@@ -353,6 +423,45 @@ function VideoScroll() {
               padding: isMobile ? '0 16px' : '0',
             }}
           >
+            {/* Data Stream Background Effect */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}>
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `${Math.random() * 100}%`,
+                    width: '1px',
+                    height: '20px',
+                    background: 'linear-gradient(to bottom, transparent, #00ffff, transparent)',
+                    animation: `DataStream ${3 + Math.random() * 2}s linear infinite`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    opacity: 0.6,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Scan Line Effect */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '2px',
+              background: 'linear-gradient(to right, transparent, #00ffff, transparent)',
+              animation: 'ScanLine 4s linear infinite',
+              boxShadow: '0 0 10px #00ffff',
+            }} />
+
             <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -360,28 +469,28 @@ function VideoScroll() {
               style={{ textAlign: 'center', lineHeight: 1 }}
             >
               <div
+                className="tech-text"
                 style={{
-                  fontFamily: 'Vidaloka, Georgia, serif',
-                  fontWeight: 900,
-                  fontSize: isMobile ? 'clamp(36px, 11vw, 54px)' : 'clamp(54px, 13vw, 150px)',
-                  color: '#ffd65a',
-                  letterSpacing: isMobile ? '-1px' : '-3px',
-                  textShadow: '0 8px 24px rgba(0,0,0,0.7)',
+                  fontSize: isMobile ? 'clamp(28px, 8vw, 42px)' : 'clamp(42px, 10vw, 80px)',
+                  color: '#00ffff',
+                  letterSpacing: isMobile ? '0.03em' : '0.05em',
                   marginBottom: 8,
-                  background: 'none',
+                  animation: 'NeonGlow 3s ease-in-out infinite',
+                  textShadow: '0 0 8px #00ffff, 0 0 16px #00ffff',
+                  position: 'relative',
                 }}
               >
-                BYTES<span style={{ color: '#ffd65a' }}>.</span>
+                BYTES<span style={{ color: '#ff00ff', animation: 'CyberGlow 3s ease-in-out infinite' }}>.</span>
               </div>
               <div
+                className="cyber-text"
                 style={{
-                  fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-                  fontWeight: 300,
-                  fontSize: isMobile ? 'clamp(12px, 3vw, 16px)' : 'clamp(16px, 4vw, 28px)',
+                  fontSize: isMobile ? 'clamp(10px, 2.5vw, 14px)' : 'clamp(14px, 3vw, 20px)',
                   color: '#ffffff',
-                  letterSpacing: '0.3em',
-                  textShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                  letterSpacing: '0.1em',
+                  textShadow: '0 0 4px #ffffff',
                   opacity: 0.9,
+                  marginBottom: 16,
                 }}
               >
                 PLATFORM
@@ -390,15 +499,21 @@ function VideoScroll() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
+                className="futuristic-text"
                 style={{
                   marginTop: isMobile ? 16 : 24,
-                  fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
-                  color: '#ffffff',
+                  fontSize: isMobile ? 'clamp(10px, 2vw, 12px)' : 'clamp(12px, 2vw, 16px)',
+                  color: '#00ffff',
                   opacity: 0.8,
                   fontWeight: 300,
+                  textShadow: '0 0 4px #00ffff',
+                  border: '1px solid rgba(0, 255, 255, 0.2)',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  background: 'rgba(0, 255, 255, 0.03)',
                 }}
               >
-                Scroll to explore our digital solutions
+                [ SCROLL TO INITIALIZE SYSTEM ] →
               </motion.div>
             </motion.div>
           </motion.div>
@@ -460,17 +575,19 @@ function VideoScroll() {
                   initial={{ y: isEnhanced ? -60 : 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
+                  className="tech-text"
                   style={{
-                    fontFamily: 'Vidaloka, Georgia, serif',
-                    fontSize: isMobile ? 'clamp(32px, 8vw, 56px)' : 'clamp(56px, 8vw, 112px)',
-                    fontWeight: 400,
-                    color: '#ffd65a',
+                    fontSize: isMobile ? 'clamp(24px, 6vw, 36px)' : 'clamp(36px, 6vw, 64px)',
+                    fontWeight: 600,
+                    color: '#00ffff',
                     marginBottom: isMobile ? 12 : 16,
                     lineHeight: 1.1,
-                    textShadow: '0 4px 16px rgba(0,0,0,0.8)',
+                    textShadow: '0 0 8px #00ffff, 0 0 16px #00ffff',
                     textAlign: currentService.side === 'center' ? 'center' : 'left',
-                    background: 'none',
-                    animation: undefined,
+                    animation: 'NeonGlow 4s ease-in-out infinite',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    position: 'relative',
                   }}
                 >
                   {currentService.title}
@@ -481,15 +598,19 @@ function VideoScroll() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
+                  className="cyber-text"
                   style={{
-                    fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-                    fontSize: isMobile ? 'clamp(14px, 2.5vw, 16px)' : 'clamp(16px, 2.5vw, 24px)',
+                    fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
                     color: '#ffffff',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    textShadow: '0 0 4px #ffffff',
                     marginBottom: isMobile ? 24 : 32,
                     lineHeight: 1.6,
-                    fontWeight: 300,
+                    fontWeight: 400,
                     textAlign: currentService.side === 'center' ? 'center' : 'left',
+                    letterSpacing: '0.02em',
+                    borderLeft: '2px solid #00ffff',
+                    paddingLeft: '12px',
+                    background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.05), transparent)',
                   }}
                 >
                   {currentService.desc}
@@ -508,15 +629,32 @@ function VideoScroll() {
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.5 + idx * 0.1, duration: 0.3 }}
+                      className="futuristic-text"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         marginBottom: 12,
-                        fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(14px, 2vw, 18px)',
-                        color: '#ffffff',
-                        textShadow: '0 2px 6px rgba(0,0,0,0.6)',
-                        opacity: 0.85,
-                        fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
+                        fontSize: isMobile ? 'clamp(10px, 1.8vw, 12px)' : 'clamp(12px, 1.8vw, 16px)',
+                        color: '#00ffff',
+                        textShadow: '0 0 4px #00ffff',
+                        opacity: 0.9,
+                        fontWeight: 400,
+                        letterSpacing: '0.01em',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                        background: 'rgba(0, 255, 255, 0.03)',
+                        border: '1px solid rgba(0, 255, 255, 0.15)',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.08)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        e.currentTarget.style.textShadow = '0 0 6px #00ffff';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.03)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.15)';
+                        e.currentTarget.style.textShadow = '0 0 4px #00ffff';
                       }}
                     >
                       <div
@@ -524,9 +662,10 @@ function VideoScroll() {
                           width: 6,
                           height: 6,
                           borderRadius: '50%',
-                          background: '#FBBF24',
-                          marginRight: 16,
-                          boxShadow: '0 0 8px rgba(251, 191, 36, 0.6)',
+                          background: '#00ffff',
+                          marginRight: 12,
+                          boxShadow: '0 0 4px #00ffff',
+                          animation: 'NeonGlow 3s ease-in-out infinite',
                         }}
                       />
                       {feature}
@@ -551,12 +690,16 @@ function VideoScroll() {
                     {currentService.stats.map((stat, idx) => (
                       <div key={idx} style={{ textAlign: 'center' }}>
                         <div
+                          className="tech-text"
                           style={{
-                            fontFamily: 'Vidaloka, Georgia, serif',
-                            fontSize: isMobile ? 'clamp(24px, 6vw, 32px)' : 'clamp(36px, 6vw, 56px)',
-                            color: '#ffd65a',
-                            textShadow: '0 0 8px rgba(255, 214, 90, 0.6)',
-                            background: 'none',
+                            fontSize: isMobile ? 'clamp(18px, 4vw, 24px)' : 'clamp(24px, 4vw, 36px)',
+                            color: '#00ffff',
+                            textShadow: '0 0 6px #00ffff, 0 0 12px #00ffff',
+                            animation: 'NeonGlow 3s ease-in-out infinite',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(0, 255, 255, 0.2)',
+                            background: 'rgba(0, 255, 255, 0.03)',
                           }}
                         >
                           {(() => {
@@ -576,12 +719,15 @@ function VideoScroll() {
                           })()}
                         </div>
                         <div
+                          className="cyber-text"
                           style={{
-                            fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-                            fontSize: isMobile ? 'clamp(12px, 2vw, 14px)' : 'clamp(16px, 2vw, 20px)',
+                            fontSize: isMobile ? 'clamp(10px, 1.8vw, 12px)' : 'clamp(12px, 1.8vw, 16px)',
                             color: '#ffffff',
-                            opacity: 0.7,
-                            fontWeight: 300,
+                            opacity: 0.8,
+                            fontWeight: 400,
+                            textShadow: '0 0 4px #ffffff',
+                            marginTop: '6px',
+                            letterSpacing: '0.02em',
                           }}
                         >
                           {stat.label}
@@ -598,29 +744,41 @@ function VideoScroll() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.7, duration: 0.4 }}
+                    className="tech-text"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '12px',
-                      padding: isMobile ? '12px 24px' : '8px 16px',
+                      padding: isMobile ? '12px 24px' : '10px 20px',
                       minWidth: isMobile ? 48 : undefined,
                       minHeight: isMobile ? 48 : undefined,
-                      borderRadius: '25px',
-                      fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-                      fontSize: isMobile ? 16 : 14,
-                      background: 'linear-gradient(135deg, #fff4d2, #ffd65a)',
-                      color: '#000000',
-                      fontWeight: 700,
+                      borderRadius: '6px',
+                      fontSize: isMobile ? 14 : 12,
+                      background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05))',
+                      color: '#00ffff',
+                      fontWeight: 600,
                       textDecoration: 'none',
-                      boxShadow: '0 8px 32px rgba(255, 214, 90, 0.4)',
-                      transition: 'transform 0.2s ease',
+                      boxShadow: '0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)',
+                      transition: 'all 0.2s ease',
                       pointerEvents: 'auto',
                       margin: currentService.side === 'center' ? '0 auto' : '0',
+                      border: '1px solid #00ffff',
+                      textShadow: '0 0 4px #00ffff',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.02)';
+                      e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.1)';
+                      e.currentTarget.style.textShadow = '0 0 6px #00ffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)';
+                      e.currentTarget.style.textShadow = '0 0 4px #00ffff';
+                    }}
                   >
-                    Get Started →
+                    [ INITIALIZE CONNECTION ] →
                   </motion.a>
                 )}
 
@@ -662,8 +820,9 @@ function VideoScroll() {
                           width: 16,
                           height: 16,
                           borderRadius: '50%',
-                          background: 'radial-gradient(circle at 30% 30%, #fff4d2, #ffd65a)',
+                          background: 'radial-gradient(circle at 30% 30%, #00ffff, #0080ff)',
                           mixBlendMode: 'screen',
+                          boxShadow: '0 0 10px #00ffff, 0 0 20px #00ffff',
                         }}
                       />
                     ))}
@@ -731,20 +890,23 @@ function VideoScroll() {
           transform: 'translateX(-50%)',
           width: isMobile ? '80%' : '300px',
           height: '4px',
-          background: 'rgba(255, 255, 255, 0.2)',
+          background: 'rgba(0, 255, 255, 0.1)',
           borderRadius: '2px',
           overflow: 'hidden',
           zIndex: 10000,
+          border: '1px solid rgba(0, 255, 255, 0.2)',
+          boxShadow: '0 0 5px rgba(0, 255, 255, 0.2)',
         }}
       >
         <div
           style={{
             width: `${(desiredTimeRef.current / duration) * 100}%`,
             height: '100%',
-            background: 'linear-gradient(90deg, #93C5FD, #FBBF24)',
+            background: 'linear-gradient(90deg, #00ffff, #0080ff)',
             borderRadius: '2px',
             transition: 'width 0.1s ease',
-            boxShadow: '0 0 8px rgba(255, 214, 90, 0.6)',
+            boxShadow: '0 0 6px #00ffff',
+            animation: 'NeonGlow 3s ease-in-out infinite',
           }}
         />
       </div>
@@ -755,37 +917,62 @@ function VideoScroll() {
         initial={{ opacity: 1 }}
         animate={{ opacity: [1, 0.35] }}
         transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+        className="tech-text"
         style={{
           position: 'fixed',
           bottom: isMobile ? '24px' : '20px',
           right: isMobile ? '24px' : '20px',
-          padding: isMobile ? '14px 28px' : '14px 32px',
-          borderRadius: '32px',
-          background: 'linear-gradient(135deg, #fff4d2, #ffd65a)',
-          color: '#000000',
-          fontWeight: 700,
-          fontSize: isMobile ? 14 : 16,
+          padding: isMobile ? '10px 20px' : '8px 16px',
+          borderRadius: '6px',
+          background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05))',
+          color: '#00ffff',
+          fontWeight: 600,
+          fontSize: isMobile ? 12 : 10,
           textDecoration: 'none',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+          boxShadow: '0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)',
           zIndex: 10001,
-          fontFamily: 'Source Sans Pro, Helvetica, sans-serif',
-          transition: 'background 0.25s ease, color 0.25s ease, transform 0.25s ease',
+          transition: 'all 0.2s ease',
+          border: '1px solid #00ffff',
+          textShadow: '0 0 4px #00ffff',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#ffd65a';
-          e.currentTarget.style.color = '#ffffff';
-          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.1))';
+          e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.1)';
+          e.currentTarget.style.textShadow = '0 0 6px #00ffff';
+          e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'linear-gradient(135deg, #fff4d2, #ffd65a)';
-          e.currentTarget.style.color = '#000000';
-          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05))';
+          e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)';
+          e.currentTarget.style.textShadow = '0 0 4px #00ffff';
+          e.currentTarget.style.transform = 'translateY(0) scale(1)';
         }}
       >
-        Book Now
+        [ BOOK NOW ]
       </motion.a>
     </div>
   );
 }
 
 export default VideoScroll;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///ghghgghjgghgghgghgghvfvdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdf
+
+
+
